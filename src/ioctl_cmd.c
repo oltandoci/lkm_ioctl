@@ -52,31 +52,31 @@ int ioctl_init(void)
 	int ret;
 	struct device *dev_ret;
 	
-    //request the kernel for FIRST_MINOR devices  
+    /*request the kernel for FIRST_MINOR devices*/  
     if ((ret = alloc_chrdev_region(&dev, FIRST_MINOR, MINOR_CNT, MOD_ALIAS)) < 0) {
     	printk(KERN_INFO "issues calling alloc_chrdev_region\n");
         return ret;
     }
     
-    //create /sys/class/MOD_ALIAS entry
+    /*create /sys/class/MOD_ALIAS entry*/
     if (IS_ERR(c1 = class_create(THIS_MODULE, MOD_ALIAS))) {
     	printk(KERN_INFO "issues calling class_create\n");
     	unregister_chrdev_region(dev, MINOR_CNT);
     	return PTR_ERR(c1);
     }
     
-    //init cdev in order to use user ioctl commands
+    /*init cdev in order to use user ioctl commands*/
     cdev_init(&c_dev, &ioctl_fops);
-    c_dev.owner = THIS_MODULE; //cf LDD 3rd ed, l.56
+    c_dev.owner = THIS_MODULE; /*cf LDD 3rd ed, l.56*/
     
-    //once the cdev is set up, tell the kernel about it
+    /*once the cdev is set up, tell the kernel about it*/
     if ((ret = cdev_add(&c_dev, dev, MINOR_CNT)) < 0) {
     	printk(KERN_INFO "issues calling cdev_add\n");
     	unregister_chrdev_region(dev, MINOR_CNT);
     	return ret;
     }
     
-    //create /sys/class/MOD_ALIAS/test_command entry and /dev/test_command entries
+    /*create /sys/class/MOD_ALIAS/test_command entry and /dev/test_command entries*/
     if (IS_ERR(dev_ret = device_create(c1, NULL, dev, NULL, "test_command"))) {
     	printk(KERN_INFO "issues calling device_create\n");
     	class_destroy(c1);
